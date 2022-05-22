@@ -7,14 +7,14 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyD37S7biVjxgWaxM29rme81rtqjRflaLZo",
-  authDomain: "checkoutmercadopagopixwebhook.firebaseapp.com",
-  databaseURL: "https://checkoutmercadopagopixwebhook-default-rtdb.firebaseio.com",
-  projectId: "checkoutmercadopagopixwebhook",
-  storageBucket: "checkoutmercadopagopixwebhook.appspot.com",
-  messagingSenderId: "244677114830",
-  appId: "1:244677114830:web:14552f5a00e78ffb07c99f",
-  measurementId: "G-RP38TWGDJH"
+  apiKey: "AIzaSyC6RO-LQ6AkHGYg5M6XDiHADqGkXkfRNFw",
+  authDomain: "expomontes2022.firebaseapp.com",
+  databaseURL: "https://expomontes2022-default-rtdb.firebaseio.com",
+  projectId: "expomontes2022",
+  storageBucket: "expomontes2022.appspot.com",
+  messagingSenderId: "827957059820",
+  appId: "1:827957059820:web:e1dcffd21021cd1942c5c9",
+  measurementId: "G-9ZD91VJWPD"
 };
 
 // Initialize Firebase
