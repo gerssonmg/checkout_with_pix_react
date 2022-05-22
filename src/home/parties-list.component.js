@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import api from "../services/api";
 // import Logo from '..images/logo_item_expo.png';
-import { writeUserData } from '../database/firebase-realtime'
+// import { writeUserData } from '../database/firebase-realtime'
 function App() {
 
   const [showStory, setShowStory] = useState(true)
@@ -20,7 +20,7 @@ function App() {
 }
 
 function StoryComponent({ setShowStory, setShowPixComponent }) {
-  writeUserData()
+  // writeUserData()
 
   return (
     <>
