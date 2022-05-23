@@ -80,7 +80,7 @@ function CheckoutPixComponent({ setShowStory, setShowPixComponent }) {
         "federal_unit": "SP"
       }
     },
-    "notification_url": "https://webhook.site/35ba8331-4cd6-4760-adc1-bf62c92fe29d"
+    "notification_url": "https://us-central1-expomontes2022.cloudfunctions.net/addMessage"
   }
 
   // writeUserData()
