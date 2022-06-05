@@ -1,42 +1,59 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-// import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
+import { useHistory } from 'react-router-dom';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const theme = createTheme();
 
 export default function SignIn() {
+
+  const history = useHistory();
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const email = data.get('email')
+    const password = data.get('password')
+
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    const auth = getAuth();
+
+    signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+      const user = userCredential.user
+      history.push('/perfil')
+    }).catch((error) => {
+      if (error?.code === "auth/user-not-found") {
+        alert("Usuario não cadastrado. Faça um cadastro antes de tentar fazer login")
+      } else {
+
+        alert(error.code + "::" + error.message)
+      }
+    })
+
   };
 
   return (
     <ThemeProvider theme={theme}>
+      <Button
+        variant="contained"
+        onClick={() => history.push('/')}
+      >
+        Voltar
+      </Button>
+
       <Container component="main" maxWidth="xs" style={{ backgroundColor: '#fff', marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -81,19 +98,18 @@ export default function SignIn() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="/recuperar-senha" variant="body2">
                   Recuperar Senha?
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/cadastro" variant="body2">
                   {"Criar conta"}
                 </Link>
               </Grid>
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
   );

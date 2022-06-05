@@ -1,17 +1,26 @@
 import './App.css';
-import LoginComponent from './login/login.component';
-import SignupComponent from './sign-up/signup.component';
-import PartiesListComponent from './home/parties-list.component';
+
+import PublicRoutes from './routes_public';
+import Typography from '@mui/material/Typography';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <PartiesListComponent />
-        <LoginComponent />
-        <SignupComponent />
+    <div class="App">
+      <header class="App-header">
+        <PublicRoutes />
+        <Copyright sx={{ mt: 5 }} />
       </header>
     </div>
+  );
+}
+
+function Copyright(props) {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
   );
 }
 

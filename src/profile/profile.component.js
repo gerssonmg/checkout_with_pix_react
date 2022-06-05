@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -8,31 +8,26 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
-import { useHistory } from 'react-router-dom';
+import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth"
 
+import { useHistory } from 'react-router-dom';
 
 const theme = createTheme();
 
-export default function SignUp() {
-  const auth = getAuth();
-  useEffect(() => {
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        history.push('/perfil')
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-        // ...
-      } else {
-        // User is signed out
-        // ...
-      }
-    });
-  });
+export default function ProfileComponent() {
 
   const history = useHistory();
+
+  const auth = getAuth();
+  const callSingOut = () => {
+    signOut(auth).then(() => {
+      // Sign-out successful.
+      alert("Sessão encerrada com sucesso")
+    }).catch((error) => {
+      // An error happened.
+      alert(error.code + "::" + error.message)
+    });
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -45,32 +40,25 @@ export default function SignUp() {
       password: data.get('password'),
     });
 
-    // const auth = getAuth();
+    const auth = getAuth();
     createUserWithEmailAndPassword(auth, data.get('email'), data.get('password'))
       .then((userCredential) => {
         // Signed in
-        const user = userCredential.user;
+        // const user = userCredential.user;
 
-        history.push('/perfil')
         // SALVAR RESTANTE DOS DADOS NO REALTIME DATABSE
         // MUDAR DE TELA
       })
       .catch((error) => {
         // MOSTRAR ERROR NA TELA
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        alert(errorCode + "::" + errorMessage)
+        // const errorCode = error.code;
+        // const errorMessage = error.message;
+        // ..
       });
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Button
-        variant="contained"
-        onClick={() => history.push('/')}
-      >
-        Voltar
-      </Button>
       <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -82,7 +70,7 @@ export default function SignUp() {
           }}
         >
           <Typography component="h1" variant="h5" style={{ color: "#000" }}>
-            Criar Cadastro
+            Seus Dados
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -95,6 +83,8 @@ export default function SignUp() {
                   id="firstName"
                   label="Nome Completo"
                   autoFocus
+                  disabled
+                  value="AQU"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -106,6 +96,7 @@ export default function SignUp() {
                   id="cpf"
                   label="CPF"
                   autoFocus
+                  disabled
                 />
               </Grid>
 
@@ -118,6 +109,7 @@ export default function SignUp() {
                   id="nascimento"
                   label="Data Nascimento"
                   autoFocus
+                  disabled
                 />
               </Grid>
 
@@ -129,31 +121,11 @@ export default function SignUp() {
                   id="email"
                   label="E-mail"
                   name="email"
+                  disabled
                   autoComplete="email"
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Senha"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password2"
-                  label="Repita a senha"
-                  type="password2"
-                  id="password2"
-                  autoComplete="new-password"
-                />
-              </Grid>
+
               <Grid item xs={12}>
 
               </Grid>
@@ -163,17 +135,44 @@ export default function SignUp() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              onClick={() => history.push('/')}
             >
-              Cadastrar
+              Ver Ingresso para comprar
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login" variant="body2">
-                  Ja tem conta? Fazer login
+                <Link onClick={() => callSingOut()} href="/" variant="body">
+                  Sair
                 </Link>
               </Grid>
             </Grid>
           </Box>
+
+          <Typography component="h1" variant="h5" style={{ color: "#000" }}>
+            Seus ingressos:
+          </Typography>
+
+
+          <hr size="1" width="100%"></hr>
+          <Typography style={{ color: "#000" }}>
+            Para o dia:
+          </Typography>
+
+          <Typography style={{ color: "#000" }}>
+            Valor pago:
+          </Typography>
+
+          <Typography style={{ color: "#000" }}>
+            Para o dia:
+          </Typography>
+
+          <Typography style={{ color: "#000" }}>
+            Utilizado:
+          </Typography>
+
+          <Typography style={{ color: "#000" }}>
+            QR Code:
+          </Typography>
         </Box>
       </Container>
     </ThemeProvider >
