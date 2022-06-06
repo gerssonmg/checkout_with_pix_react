@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -8,7 +8,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth"
+import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"
+import { getDatabase, ref, onValue } from "firebase/database";
 
 import { useHistory } from 'react-router-dom';
 
@@ -17,6 +18,11 @@ const theme = createTheme();
 export default function ProfileComponent() {
 
   const history = useHistory();
+
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+  const [userCpf, setUserCpf] = useState("")
+  const [userNascimento, setUserNascimento] = useState("")
 
   const auth = getAuth();
   const callSingOut = () => {
@@ -28,6 +34,25 @@ export default function ProfileComponent() {
       alert(error.code + "::" + error.message)
     });
   }
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const db = getDatabase();
+        const starCountRef = ref(db, 'users/' + user.uid);
+        onValue(starCountRef, (snapshot) => {
+          const data = snapshot.val();
+          console.log('data');
+          console.log(data);
+          setUserCpf(data?.cpf)
+          setUserName(data?.firstName)
+          setUserNascimento(data?.nascimento)
+          setUserEmail(data?.email)
+        });
+      }
+    });
+
+  })
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -78,23 +103,22 @@ export default function ProfileComponent() {
                 <TextField
                   autoComplete="given-name"
                   name="firstName"
-                  required
                   fullWidth
                   id="firstName"
                   label="Nome Completo"
                   autoFocus
                   disabled
-                  value="AQU"
+                  value={userName}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   autoComplete="given-name"
                   name="cpf"
-                  required
+                  label="CPF"
                   fullWidth
                   id="cpf"
-                  label="CPF"
+                  value={userCpf}
                   autoFocus
                   disabled
                 />
@@ -104,25 +128,22 @@ export default function ProfileComponent() {
                 <TextField
                   autoComplete="given-name"
                   name="nascimento"
-                  required
+                  label="Data Nascimento"
                   fullWidth
                   id="nascimento"
-                  label="Data Nascimento"
+                  value={userNascimento}
                   autoFocus
                   disabled
                 />
               </Grid>
-
-
               <Grid item xs={12}>
                 <TextField
-                  required
                   fullWidth
-                  id="email"
                   label="E-mail"
+                  id="email"
                   name="email"
                   disabled
-                  autoComplete="email"
+                  value={userEmail}
                 />
               </Grid>
 

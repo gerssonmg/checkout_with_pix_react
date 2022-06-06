@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import { useHistory } from 'react-router-dom';
+import { getDatabase, ref, set } from "firebase/database";
 
 
 const theme = createTheme();
@@ -17,7 +18,6 @@ const theme = createTheme();
 export default function SignUp() {
   const auth = getAuth();
   useEffect(() => {
-
     onAuthStateChanged(auth, (user) => {
       if (user) {
         history.push('/perfil')
@@ -51,7 +51,17 @@ export default function SignUp() {
         // Signed in
         const user = userCredential.user;
 
+        const db = getDatabase();
+        console.log(db)
+        set(ref(db, `users/${user.uid}`), {
+          email: data.get("email"),
+          firstName: data.get("firstName"),
+          cpf: data.get("cpf"),
+          nascimento: data.get("nascimento")
+        });
+
         history.push('/perfil')
+
         // SALVAR RESTANTE DOS DADOS NO REALTIME DATABSE
         // MUDAR DE TELA
       })
@@ -62,6 +72,7 @@ export default function SignUp() {
         alert(errorCode + "::" + errorMessage)
       });
   };
+
 
   return (
     <ThemeProvider theme={theme}>
