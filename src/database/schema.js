@@ -12,89 +12,89 @@ const schemaDBBilhetes = {
   "1julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "1 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "2julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "2 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "3julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "3 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "4julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "4 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "5julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "5 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "6julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "6 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "7julho2022": {
-    "disponivel_para_compra": false,
+    "disponivel_para_compra": true,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "7 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "8julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "8 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "9julho2022": {
-    "disponivel_para_compra": false,
+    "disponivel_para_compra": true,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "9 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
   "10julho2022": {
     "disponivel_para_compra": false,
     "valor": 10.50,
-    "title": "ABC",
-    "subtitle": "123",
-    "describe": "XXX",
+    "title": "10 Julho 2022",
+    "subtitle": "_",
+    "describe": "Ingresso valido para entrada ate as 16hrs",
     "url_baner": ""
   },
 }
 
-function writeBilhetesSchema() {
+export function writeBilhetesSchema() {
   const db = getDatabase();
   console.log(db)
-  set(ref(db, 'ROOT/bilhetes/expomontes2022/'), schemaDBBilhetes);
+  set(ref(db, 'XYZ/bilhetes/expomontes2022/'), schemaDBBilhetes);
 }
 
 
