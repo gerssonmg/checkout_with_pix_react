@@ -10,6 +10,7 @@ import { getDatabase, ref, set } from "firebase/database";
 
 const schemaDBBilhetes = {
   "1julho2022": {
+    "id": "1julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "1 Julho 2022",
@@ -18,6 +19,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "2julho2022": {
+    "id": "2julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "2 Julho 2022",
@@ -26,6 +28,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "3julho2022": {
+    "id": "3julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "3 Julho 2022",
@@ -34,6 +37,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "4julho2022": {
+    "id": "4julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "4 Julho 2022",
@@ -42,6 +46,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "5julho2022": {
+    "id": "5julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "5 Julho 2022",
@@ -50,6 +55,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "6julho2022": {
+    "id": "6julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "6 Julho 2022",
@@ -58,6 +64,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "7julho2022": {
+    "id": "7julho2022",
     "disponivel_para_compra": true,
     "valor": 10.50,
     "title": "7 Julho 2022",
@@ -66,6 +73,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "8julho2022": {
+    "id": "8julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "8 Julho 2022",
@@ -74,6 +82,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "9julho2022": {
+    "id": "9julho2022",
     "disponivel_para_compra": true,
     "valor": 10.50,
     "title": "9 Julho 2022",
@@ -82,6 +91,7 @@ const schemaDBBilhetes = {
     "url_baner": ""
   },
   "10julho2022": {
+    "id": "10julho2022",
     "disponivel_para_compra": false,
     "valor": 10.50,
     "title": "10 Julho 2022",
@@ -94,7 +104,7 @@ const schemaDBBilhetes = {
 export function writeBilhetesSchema() {
   const db = getDatabase();
   console.log(db)
-  set(ref(db, 'XYZ/bilhetes/expomontes2022/'), schemaDBBilhetes);
+  set(ref(db, 'venda_online/bilhetes/expomontes2022/'), schemaDBBilhetes);
 }
 
 

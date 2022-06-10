@@ -24,21 +24,18 @@ export default function SignIn() {
     const email = data.get('email')
     const password = data.get('password')
 
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-
     const auth = getAuth();
 
     signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
-      const user = userCredential.user
       history.push('/perfil')
     }).catch((error) => {
       if (error?.code === "auth/user-not-found") {
         alert("Usuario não cadastrado. Faça um cadastro antes de tentar fazer login")
+      } else if (error?.code === "auth/invalid-email") {
+        alert("E-mail informado e invalido")
+      } else if (error?.code === "auth/wrong-password") {
+        alert("Me parece que a senha esta invalida para esse e-mail")
       } else {
-
         alert(error.code + "::" + error.message)
       }
     })

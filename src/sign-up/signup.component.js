@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -11,11 +11,33 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import { useHistory } from 'react-router-dom';
 import { getDatabase, ref, set } from "firebase/database";
+import {
+  emailIsValid,
+  nameIsValid,
+  isCpfValid,
+  isPasswordValid
+} from './validators';
 
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
+import { format } from 'date-fns';
 
 const theme = createTheme();
 
 export default function SignUp() {
+
+  const [formNameError, setFormNameError] = useState(false)
+  const [formCpfError, setFormCpfError] = useState(false)
+  const [formNascimentoError, setFormNascimentoError] = useState(false)
+  const [formEmailError, setFormEmailError] = useState(false)
+  const [formPasswordError, setFormPasswordError] = useState(false)
+  const [formPassword2Error, setFormPassword2Error] = useState(false)
+
+  const [value, setValue] = useState("")
+
+
   const auth = getAuth();
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -23,8 +45,6 @@ export default function SignUp() {
         history.push('/perfil')
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-        // ...
       } else {
         // User is signed out
         // ...
@@ -38,29 +58,78 @@ export default function SignUp() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-
     // VALIDAS OS CAMPOS
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email')
+    const firstName = data.get('firstName')
+    const nascimento = value
+    const cpf = data.get('cpf')
+    const password = data.get('password')
+    const password2 = data.get('password2')
 
-    // const auth = getAuth();
+
+    if (!nameIsValid(firstName)) {
+      setFormNameError(true)
+      return null
+    } else {
+      setFormNameError(false)
+    }
+
+
+    if (!isCpfValid(cpf)) {
+      setFormCpfError(true)
+      return null
+    } else {
+      setFormCpfError(false)
+    }
+
+    if (!nascimento) {
+      setFormNascimentoError(true)
+      return null
+    } else {
+      setFormNascimentoError(false)
+    }
+
+    if (!emailIsValid(email)) {
+      setFormEmailError(true)
+      return null
+    } else {
+      setFormEmailError(false)
+    }
+
+
+
+
+    if (!isPasswordValid(password)) {
+      setFormPasswordError(true)
+      return null
+    } else {
+
+      setFormPasswordError(false)
+    }
+
+    if (password !== password2) {
+      setFormPassword2Error(true)
+      return null
+    } else {
+      setFormPasswordError(false)
+    }
+
     createUserWithEmailAndPassword(auth, data.get('email'), data.get('password'))
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
 
         const db = getDatabase();
-        console.log(db)
+
         set(ref(db, `users/${user.uid}`), {
           email: data.get("email"),
           firstName: data.get("firstName"),
           cpf: data.get("cpf"),
-          nascimento: data.get("nascimento")
+          nascimento: format(value, "dd-MM-yyyy")
+        }).then(() => {
+          history.push('/perfil')
         });
 
-        history.push('/perfil')
 
         // SALVAR RESTANTE DOS DADOS NO REALTIME DATABSE
         // MUDAR DE TELA
@@ -99,6 +168,8 @@ export default function SignUp() {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
+                  error={formNameError}
+                  helperText={formNameError ? "Informe nome completo" : ""}
                   autoComplete="given-name"
                   name="firstName"
                   required
@@ -110,6 +181,8 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  error={formCpfError}
+                  helperText={formCpfError ? "CPF invalido. Informe apenas numeros." : ""}
                   autoComplete="given-name"
                   name="cpf"
                   required
@@ -120,8 +193,10 @@ export default function SignUp() {
                 />
               </Grid>
 
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <TextField
+                  error={formNascimentoError}
+                  helperText={formNascimentoError ? "Data de nascimento Invalida" : ""}
                   autoComplete="given-name"
                   name="nascimento"
                   required
@@ -130,11 +205,33 @@ export default function SignUp() {
                   label="Data Nascimento"
                   autoFocus
                 />
+              </Grid> */}
+
+              <Grid item xs={12}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="Data de Nascimento"
+                    value={value}
+                    onChange={(newValue) => {
+                      setValue(newValue);
+                    }}
+                    renderInput={(params) =>
+                      <TextField
+                        error={formNascimentoError}
+                        helperText={formNascimentoError ? "Data de nascimento Invalida" : ""}
+
+                        {...params}
+                      />
+                    }
+                  />
+                </LocalizationProvider>
               </Grid>
 
 
               <Grid item xs={12}>
                 <TextField
+                  error={formEmailError}
+                  helperText={formEmailError ? "E-mail invalido" : ""}
                   required
                   fullWidth
                   id="email"
@@ -145,6 +242,8 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  error={formPasswordError}
+                  helperText={formPasswordError ? "Senha deve ter 6 digitos no minimo" : ""}
                   required
                   fullWidth
                   name="password"
@@ -156,6 +255,8 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  error={formPassword2Error}
+                  helperText={"Senhas devem ser iguais"}
                   required
                   fullWidth
                   name="password2"

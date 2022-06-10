@@ -5,6 +5,7 @@ import LoginComponent from './login/login.component';
 import SignupComponent from './sign-up/signup.component';
 import PartiesListComponent from './home/parties-list.component';
 import Profile from './profile/profile.component'
+import CheckoutPixComponent from './checkout/CheckoutPixComponent';
 
 export default function PublicRoutes() {
   return (
@@ -19,6 +20,11 @@ export default function PublicRoutes() {
       <Route
         path="/perfil"
         component={Profile}
+      />
+
+      <Route
+        path="/comprar/:id"
+        component={CheckoutPixComponent}
       />
       <Route
         path="/"

@@ -2,8 +2,10 @@
 
 Validar formulario de sign-up 2
 Validar formulario de login 2
-Pegar lista de ingressos do DB 1
+
 Implementar Recuperar senha 2
+
+Pegar lista de ingressos do DB 1
 Implementar compra de ingresso 2
 Listar ingressos comprados 2
 

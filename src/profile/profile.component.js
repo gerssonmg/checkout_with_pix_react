@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -12,10 +12,16 @@ import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
 import { getDatabase, ref, onValue } from "firebase/database";
 
 import { useHistory } from 'react-router-dom';
+import CheckoutContext from '../context-global/checkout.context';
 
 const theme = createTheme();
 
 export default function ProfileComponent() {
+
+  const {
+    checkout
+  } = useContext(CheckoutContext);
+
 
   const history = useHistory();
 
@@ -27,10 +33,8 @@ export default function ProfileComponent() {
   const auth = getAuth();
   const callSingOut = () => {
     signOut(auth).then(() => {
-      // Sign-out successful.
       alert("Sessão encerrada com sucesso")
     }).catch((error) => {
-      // An error happened.
       alert(error.code + "::" + error.message)
     });
   }
@@ -42,8 +46,7 @@ export default function ProfileComponent() {
         const starCountRef = ref(db, 'users/' + user.uid);
         onValue(starCountRef, (snapshot) => {
           const data = snapshot.val();
-          console.log('data');
-          console.log(data);
+
           setUserCpf(data?.cpf)
           setUserName(data?.firstName)
           setUserNascimento(data?.nascimento)
@@ -54,36 +57,9 @@ export default function ProfileComponent() {
 
   })
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-
-
-    // VALIDAS OS CAMPOS
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-
-    const auth = getAuth();
-    createUserWithEmailAndPassword(auth, data.get('email'), data.get('password'))
-      .then((userCredential) => {
-        // Signed in
-        // const user = userCredential.user;
-
-        // SALVAR RESTANTE DOS DADOS NO REALTIME DATABSE
-        // MUDAR DE TELA
-      })
-      .catch((error) => {
-        // MOSTRAR ERROR NA TELA
-        // const errorCode = error.code;
-        // const errorMessage = error.message;
-        // ..
-      });
-  };
-
   return (
     <ThemeProvider theme={theme}>
+      {checkout}
       <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -97,7 +73,7 @@ export default function ProfileComponent() {
           <Typography component="h1" variant="h5" style={{ color: "#000" }}>
             Seus Dados
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" noValidate sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField

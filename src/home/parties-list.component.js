@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import './styles.css';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -7,10 +7,23 @@ import api from "../services/api";
 import Link from '@mui/material/Link';
 import { useHistory } from 'react-router-dom';
 import { getDatabase, get, ref, child, onValue } from "firebase/database";
+// import { writeBilhetesSchema } from '../database/schema'
+import CheckoutContext from '../context-global/checkout.context';
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 
 export default function App() {
 
+  // writeBilhetesSchema()
+
+  const {
+    checkout,
+    setCheckout
+  } = useContext(CheckoutContext);
+
+
   const [arrayBilhetes, setArrayBilhetes] = useState([])
+
+  const [comprar, setComprar] = useState(false)
 
   const db = getDatabase();
 
@@ -18,7 +31,7 @@ export default function App() {
     if (arrayBilhetes.length == 0) {
 
 
-      const starCountRef = ref(db, 'bilhetes/expomontes2022');
+      const starCountRef = ref(db, 'venda_online/bilhetes/expomontes2022');
       onValue(starCountRef, (snapshot) => {
         const data = snapshot.val();
 
@@ -30,32 +43,19 @@ export default function App() {
 
       });
 
-
-      // get(child(ref(getDatabase()), 'bilhetes/expomontes2022')).then((snapshot) => {
-      //   if (snapshot.exists()) {
-
-      //     const data = snapshot.val();
-
-      //     Object.entries(data).map((item) => {
-      //       setArrayBilhetes([...arrayBilhetes, item[1]])
-      //       console.log('arrayBilhetes')
-      //       console.log(arrayBilhetes)
-      //     })
-
-      //   } else {
-      //     console.log("No data available");
-      //   }
-      // }).catch((error) => {
-      //   console.error(error);
-      // });
     }
-    console.log(arrayBilhetes)
   }, [arrayBilhetes])
 
+
   const history = useHistory();
+
+  const auth = getAuth();
+
+
   return (
     <div class="App App-header">
       <>
+        {checkout?.id}
         Eventos na sua cidade: Montes Claros
 
         {
@@ -64,7 +64,7 @@ export default function App() {
               return (
                 <Box key={item[0]} style={{ backgroundColor: "#333333" }} display="flex" p={4}>
                   <Box mr={2}>
-                    <img width="300px" src={require('../images/logo_item_expo.png')} />
+                    <img width="300px" src={require('../images/claudio.jpg')} />
                   </Box>
 
                   <Box>
@@ -84,7 +84,17 @@ export default function App() {
                     </Box>
                     <Button
                       variant="contained"
-                      onClick={() => history.push('/cadastro')}
+                      onClick={() => {
+
+                        onAuthStateChanged(auth, (user) => {
+                          if (user) {
+                            history.push(`/comprar/${item[1].id}`)
+                          } else {
+                            history.push('/cadastro')
+                          }
+                        });
+
+                      }}
                     >
                       Comprar
                     </Button>
@@ -93,32 +103,6 @@ export default function App() {
               )
           })
         }
-        <Box style={{ backgroundColor: "#333333" }} display="flex" p={4}>
-          <Box mr={2}>
-            <img width="300px" src={require('../images/logo_item_expo.png')} />
-          </Box>
-
-          <Box>
-            <Box width="100px" style={{ border: "1px solid #535353", fontSize: "20px" }} >
-              10 Julho
-            </Box>
-            <Box style={{ fontSize: "20px" }} >
-              _
-            </Box>
-            <Box style={{ fontSize: "20px", color: "#e60d1e" }} display="flex">
-              Ingresso valido para entrada ate as 16hrs
-            </Box>
-            <Box style={{ fontSize: "30px", color: "#9c1" }} display="flex">
-              R$10,00
-            </Box>
-            <Button
-              variant="contained"
-              onClick={() => history.push('/cadastro')}
-            >
-              Comprar
-            </Button>
-          </Box>
-        </Box>
       </>
 
     </div >

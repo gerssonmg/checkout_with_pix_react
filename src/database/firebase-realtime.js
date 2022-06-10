@@ -8,7 +8,6 @@ export function readUserData() {
   const starCountRef = ref(db, 'users/' + 'userId');
   onValue(starCountRef, (snapshot) => {
     const data = snapshot.val();
-    console.log(data)
   });
 
 }
