@@ -1,16 +1,17 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import '../home/styles.css';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import api from "../services/api";
-import Link from '@mui/material/Link';
 import { useHistory } from 'react-router-dom';
-
-import CheckoutContext from '../context-global/checkout.context';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Container from '@mui/material/Container';
 import { useLocation } from 'react-router-dom';
 
-import { getDatabase, get, ref, child, onValue } from "firebase/database";
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
+import { getDatabase, set, update, ref, onValue } from "firebase/database";
+import { getAuth, onAuthStateChanged } from "firebase/auth"
+
 
 export default function CheckoutPixComponent() {
 
@@ -24,19 +25,28 @@ export default function CheckoutPixComponent() {
 
   const location = useLocation();
 
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+  const [userCpf, setUserCpf] = useState("")
+  const [userNascimento, setUserNascimento] = useState("")
+
+  const [idByURL_UseState, setIdByURL_UseState] = useState("")
 
   useEffect(() => {
-    if (arrayBilhetes.length == 0) {
+    const idByUrl = location.pathname.split("/")
+    setIdByURL_UseState(idByUrl[2])
+  }, [location])
+
+
+  useEffect(() => {
+    if (arrayBilhetes.length === 0) {
       const starCountRef = ref(db, 'venda_online/bilhetes/expomontes2022');
+
       onValue(starCountRef, (snapshot) => {
         const data = snapshot.val();
-
         const arr = []
-        Object.entries(data).map((item) => {
-          arr.push([item[0], item[1]])
-        })
+        Object.entries(data).map((item) => arr.push([item[0], item[1]]))
         setArrayBilhetes(arr)
-
       });
 
     } else {
@@ -50,9 +60,7 @@ export default function CheckoutPixComponent() {
 
   const auth = getAuth();
 
-  const [userName, setUserName] = useState("")
-  const [userEmail, setUserEmail] = useState("")
-  const [userCpf, setUserCpf] = useState("")
+
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -65,6 +73,7 @@ export default function CheckoutPixComponent() {
           setUserCpf(data?.cpf)
           setUserName(data?.firstName)
           setUserEmail(data?.email)
+          setUserNascimento(data?.nascimento)
         });
       }
     });
@@ -96,6 +105,29 @@ export default function CheckoutPixComponent() {
         .then((response) => {
           const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
 
+          const id_transation = response.data.id
+
+          const db = getDatabase();
+
+          printy(id_transation)
+
+          onAuthStateChanged(auth, (user) => {
+
+            set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+              valor: bilheteSelected[0][1]?.valor || 10,
+              status: 0,
+              CPF: userCpf,
+              nascimento: userNascimento,
+              Nome: userName,
+              qr_code: `ON????${id_transation}????${user.uid}`,
+              idBilhete: idByURL_UseState,
+              link_checkout: ticket_url
+            }).then(() => {
+              // history.push('/perfil')
+            });
+
+          });
+
           setBuyForMercadoPago(ticket_url)
         }
         )
@@ -105,14 +137,110 @@ export default function CheckoutPixComponent() {
     }
   }, [bilheteSelected, userEmail, userCpf]);
 
+
+
+  function waitforme(milisec, id_transation) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve('')
+        api
+          .get(`api.mercadopago.com/v1/payments/${id_transation}`)
+          .then(response => {
+
+            const status = response.data.status
+            if (status === "approved") {
+              onAuthStateChanged(auth, (user) => {
+
+                update(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+                  status: 1
+                }).then(() => {
+                  history.push('/perfil')
+                });
+
+              })
+            }
+
+          })
+          .catch(() => { })
+      }, milisec);
+    })
+  }
+
+  async function printy(id_transation) {
+    for (let i = 0; i < 10; ++i) {
+      await waitforme(10000, id_transation);
+      console.log(i);
+    }
+    console.log("Loop execution finished!)");
+  }
+
+
   return <>
     <Button variant="contained" onClick={() => history.push('/')}> {"<-"} Voltar</Button>
+
+    <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", paddingBottom: "20px", marginBottom: "20px", paddingTop: "20px" }}>
+
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            autoComplete="given-name"
+            name="firstName"
+            fullWidth
+            id="firstName"
+            label="Nome Completo"
+            autoFocus
+            disabled
+            value={userName}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            autoComplete="given-name"
+            name="cpf"
+            label="CPF"
+            fullWidth
+            id="cpf"
+            value={userCpf}
+            autoFocus
+            disabled
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            autoComplete="given-name"
+            name="nascimento"
+            label="Data Nascimento"
+            fullWidth
+            id="nascimento"
+            value={userNascimento}
+            autoFocus
+            disabled
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="E-mail"
+            id="email"
+            name="email"
+            disabled
+            value={userEmail}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+
+        </Grid>
+      </Grid>
+    </Container>
 
     {
       buyForMercadoPago &&
 
+
       <Box display="flex">
-        <iframe src={buyForMercadoPago} width="340px" height="620px" title="description"></iframe>
+        <iframe src={buyForMercadoPago} width="400px" height="620px" title="description"></iframe>
       </Box>
     }
     <Box mt={5} style={{ border: "1px solid #535353", fontSize: "20px" }} >

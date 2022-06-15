@@ -10,9 +10,10 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"
 import { getDatabase, ref, onValue } from "firebase/database";
-
+import QRCode from 'qrcode'
 import { useHistory } from 'react-router-dom';
 import CheckoutContext from '../context-global/checkout.context';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const theme = createTheme();
 
@@ -29,6 +30,18 @@ export default function ProfileComponent() {
   const [userEmail, setUserEmail] = useState("")
   const [userCpf, setUserCpf] = useState("")
   const [userNascimento, setUserNascimento] = useState("")
+  const [bilhetesOnlineByUser, setBilhetesOnlineByUser] = useState([])
+  const [qrCode, setQrCode] = useState("")
+
+
+  const toQrCode = (qr_code) => {
+    console.log("qr_code")
+    let d
+    QRCode.toDataURL(qr_code).then(data => {
+      d = data
+    })
+    return d
+  }
 
   const auth = getAuth();
   const callSingOut = () => {
@@ -51,11 +64,33 @@ export default function ProfileComponent() {
           setUserName(data?.firstName)
           setUserNascimento(data?.nascimento)
           setUserEmail(data?.email)
+
+          const arr = []
+          Object.entries(data.bilhetes_online).map((item) => {
+            arr.push({ ...item[1] })
+          })
+
+
+          setBilhetesOnlineByUser(arr || [])
         });
       }
     });
 
-  })
+  }, [auth])
+
+  function convertStatus(status) {
+    if (status === 0) {
+      return "Pagamento pendente"
+    } else if (status === 1) {
+      return "Disponivel"
+    } else if (status === 2) {
+      return "Ja foi utilizado"
+    }
+  }
+
+
+  // Changing the URL only when the user
+  // changes the input
 
   return (
     <ThemeProvider theme={theme}>
@@ -149,27 +184,46 @@ export default function ProfileComponent() {
             Seus ingressos:
           </Typography>
 
+          {
+            bilhetesOnlineByUser.map((item, index) => {
+              console.log('bilhetesOnlineByUser')
+              console.log(bilhetesOnlineByUser)
+              console.log(item)
+              console.log(index)
+              return (
+                <Box key={index}>
+                  <hr size="1" width="100%"></hr>
+                  <Typography style={{ color: "#000" }}>
+                    Nome: {item.Nome}
+                  </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    CPF: {item.CPF}
+                  </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    Data Nascimento: {item.nascimento}
+                  </Typography>
 
-          <hr size="1" width="100%"></hr>
-          <Typography style={{ color: "#000" }}>
-            Para o dia:
-          </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    Valor pago: R${item.valor}
+                  </Typography>
 
-          <Typography style={{ color: "#000" }}>
-            Valor pago:
-          </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    Para o dia: {item.idBilhete}
+                  </Typography>
 
-          <Typography style={{ color: "#000" }}>
-            Para o dia:
-          </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    Status: {
+                      convertStatus(item.status)
+                    }
+                  </Typography>
 
-          <Typography style={{ color: "#000" }}>
-            Utilizado:
-          </Typography>
-
-          <Typography style={{ color: "#000" }}>
-            QR Code:
-          </Typography>
+                  <Typography style={{ color: "#000" }}>
+                    QR Code
+                  </Typography>
+                  <QRCodeCanvas value={item.qr_code} />
+                </Box>)
+            })
+          }
         </Box>
       </Container>
     </ThemeProvider >

@@ -58,6 +58,21 @@ export default function App() {
         {checkout?.id}
         Eventos na sua cidade: Montes Claros
 
+        <Button
+          variant="contained"
+          onClick={() => {
+            onAuthStateChanged(auth, (user) => {
+              if (user) {
+                history.push('/perfil')
+              } else {
+                history.push('/cadastro')
+              }
+            });
+
+          }}
+        >
+          Ver Perfil
+        </Button>
         {
           arrayBilhetes.map((item) => {
             if (item[1].disponivel_para_compra)

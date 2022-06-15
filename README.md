@@ -1,19 +1,18 @@
 # To-do
 
-Validar formulario de sign-up 2
-Validar formulario de login 2
-
 Implementar Recuperar senha 2
-
-Pegar lista de ingressos do DB 1
-Implementar compra de ingresso 2
-Listar ingressos comprados 2
+Deploy da aplicação
 
 Implementar compra de ingressos para outras pessoas 3
 Listar outras pessoas "dependentes" 3
 
 Implementar edição de dados dos usuarios 3
-Deploy da aplicação
+
+<!-- Validar formulario de sign-up 2 -->
+<!-- Validar formulario de login 2 -->
+<!-- Pegar lista de ingressos do DB 1 -->
+<!-- Implementar compra de ingresso 2 -->
+<!-- Listar ingressos comprados 2 -->
 
 # Getting Started with Create React App
 
