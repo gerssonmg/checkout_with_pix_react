@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "expomontes2022"
+  },
+  "targets": {
+    "expomontes2022": {
+      "hosting": {
+        "bilhe": [
+          "uaisolucoesbilhetes"
+        ]
+      }
+    }
+  }
+}

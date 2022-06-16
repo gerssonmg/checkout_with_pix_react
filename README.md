@@ -1,18 +1,50 @@
 # To-do
 
 Implementar Recuperar senha 2
-Deploy da aplicação
 
-Implementar compra de ingressos para outras pessoas 3
-Listar outras pessoas "dependentes" 3
+Confirmação dos dados, antes de requisitar compra de ingresso
 
-Implementar edição de dados dos usuarios 3
+Não permitir gerar intenção de compra para mesmo dados. Deve mostrar a
+intenção ja existente
+
+O app deve ser capaz de verificar se uma compra teve pagamento aprovado
+
+Na tela de perfil, deve ser possivel ver link de pagamento
+
+Na tela de perfil deve mostrar QRCode apenas para ingressos disponiveis
+
+Implementar compra de ingressos para outras pessoas
+
+Listar outras pessoas "dependentes"
+
+Implementar edição de dados dos usuarios
+
+Edição de dados do comprador do ingresso
 
 <!-- Validar formulario de sign-up 2 -->
 <!-- Validar formulario de login 2 -->
 <!-- Pegar lista de ingressos do DB 1 -->
 <!-- Implementar compra de ingresso 2 -->
 <!-- Listar ingressos comprados 2 -->
+<!-- Deploy da aplicação -->
+
+<!-- npm run-script build -->
+
+<!-- firebase init hosting -->
+
+<!-- Configuro para a pasta `build`
+altero nas config de `firebase.json`
+{
+"hosting": [
+{
+"target": "bilhe", -->
+
+<!-- firebase target:apply hosting bilhe uaisolucoesbilhetes -->
+
+ESSES DOIS DEPOIS SO PRECISA
+
+<!-- npm run-script build -->
+<!-- firebase deploy --only hosting -->
 
 # Getting Started with Create React App
 

@@ -100,40 +100,74 @@ export default function CheckoutPixComponent() {
         "notification_url": "https://us-central1-expomontes2022.cloudfunctions.net/addMessage"
       }
 
+
+      console.log("API")
+      console.log(api)
+      api.get(`https://jsonplaceholder.typicode.com/users`)
+        .then(res => {
+          const persons = res.data;
+          console.log('persons')
+          console.log(persons)
+        })
+
+
       api
-        .post("api.mercadopago.com/v1/payments", body)
-        .then((response) => {
-          const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
+        .get(`api.mercadopago.com/v1/payments/23208174649`)
+        .then(response => {
 
-          const id_transation = response.data.id
+          console.log('response GET MERCADO')
+          console.log(response)
 
-          const db = getDatabase();
 
-          printy(id_transation)
+        })
+        .catch(() => { })
 
-          onAuthStateChanged(auth, (user) => {
+      const sendGetRequest = async () => {
+        try {
+          const resp = await api
+            .post("api.mercadopago.com/v1/payments", body)
+            .then((response) => {
+              console.log('response')
+              console.log(response)
+              const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
 
-            set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
-              valor: bilheteSelected[0][1]?.valor || 10,
-              status: 0,
-              CPF: userCpf,
-              nascimento: userNascimento,
-              Nome: userName,
-              qr_code: `ON????${id_transation}????${user.uid}`,
-              idBilhete: idByURL_UseState,
-              link_checkout: ticket_url
-            }).then(() => {
-              // history.push('/perfil')
+              const id_transation = response.data.id
+
+              const db = getDatabase();
+
+              printy(id_transation)
+
+              onAuthStateChanged(auth, (user) => {
+
+                set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+                  valor: bilheteSelected[0][1]?.valor || 10,
+                  status: 0,
+                  CPF: userCpf,
+                  nascimento: userNascimento,
+                  Nome: userName,
+                  qr_code: `ON????${id_transation}????${user.uid}`,
+                  idBilhete: idByURL_UseState,
+                  link_checkout: ticket_url
+                }).then(() => {
+                  // history.push('/perfil')
+                });
+
+              });
+
+              setBuyForMercadoPago(ticket_url)
+            }
+            )
+            .catch((err) => {
+              console.error("ops! ocorreu um erro" + err);
             });
-
-          });
-
-          setBuyForMercadoPago(ticket_url)
+        } catch (err) {
+          // Handle Error Here
+          console.error("ZZZ");
+          console.error(err);
         }
-        )
-        .catch((err) => {
-          console.error("ops! ocorreu um erro" + err);
-        });
+      };
+
+      sendGetRequest()
     }
   }, [bilheteSelected, userEmail, userCpf]);
 
