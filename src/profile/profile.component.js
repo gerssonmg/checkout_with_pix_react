@@ -33,16 +33,6 @@ export default function ProfileComponent() {
   const [bilhetesOnlineByUser, setBilhetesOnlineByUser] = useState([])
   const [qrCode, setQrCode] = useState("")
 
-
-  const toQrCode = (qr_code) => {
-    console.log("qr_code")
-    let d
-    QRCode.toDataURL(qr_code).then(data => {
-      d = data
-    })
-    return d
-  }
-
   const auth = getAuth();
   const callSingOut = () => {
     signOut(auth).then(() => {
@@ -88,9 +78,28 @@ export default function ProfileComponent() {
     }
   }
 
+  // function verificationPayment() {
+  //   api
+  //     .get(`v1/payments/${id_transation}`)
+  //     .then(response => {
 
-  // Changing the URL only when the user
-  // changes the input
+  //       const status = response.data.status
+  //       if (status === "approved") {
+  //         onAuthStateChanged(auth, (user) => {
+
+  //           update(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+  //             status: 1
+  //           }).then(() => {
+  //             history.push('/perfil')
+  //           });
+
+  //         })
+  //       }
+
+  //     })
+  //     .catch(() => { })
+
+  // }
 
   return (
     <ThemeProvider theme={theme}>
@@ -186,10 +195,6 @@ export default function ProfileComponent() {
 
           {
             bilhetesOnlineByUser.map((item, index) => {
-              console.log('bilhetesOnlineByUser')
-              console.log(bilhetesOnlineByUser)
-              console.log(item)
-              console.log(index)
               return (
                 <Box key={index}>
                   <hr size="1" width="100%"></hr>
@@ -211,16 +216,42 @@ export default function ProfileComponent() {
                     Para o dia: {item.idBilhete}
                   </Typography>
 
+                  {
+                    item.status === 0 && (
+                      <Link href={item.link_checkout} variant="body1">
+                        Clique aqui para pagar
+                      </Link>
+                    )}
+
                   <Typography style={{ color: "#000" }}>
                     Status: {
                       convertStatus(item.status)
                     }
                   </Typography>
 
-                  <Typography style={{ color: "#000" }}>
-                    QR Code
-                  </Typography>
-                  <QRCodeCanvas value={item.qr_code} />
+
+                  {
+                    item.status !== 0 && (
+                      <Box>
+                        <Typography style={{ color: "#000" }}>
+                          QR Code
+                        </Typography>
+                        <QRCodeCanvas value={item.qr_code} />
+                      </Box>
+                    )
+                  }
+
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                    onClick={() => history.push('/')}
+                  >
+                    Se ja pagou <br />
+                    clique aqui para verificarmos
+                  </Button>
+
                 </Box>)
             })
           }

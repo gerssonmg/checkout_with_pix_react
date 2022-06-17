@@ -39,18 +39,7 @@ export default function SignUp() {
 
 
   const auth = getAuth();
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        history.push('/perfil')
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-      } else {
-        // User is signed out
-        // ...
-      }
-    });
-  });
+
 
   const history = useHistory();
 
@@ -116,7 +105,6 @@ export default function SignUp() {
 
     createUserWithEmailAndPassword(auth, data.get('email'), data.get('password'))
       .then((userCredential) => {
-        // Signed in
         const user = userCredential.user;
 
         const db = getDatabase();
@@ -138,7 +126,13 @@ export default function SignUp() {
         // MOSTRAR ERROR NA TELA
         const errorCode = error.code;
         const errorMessage = error.message;
-        alert(errorCode + "::" + errorMessage)
+        if (error.code === "auth/email-already-in-use") {
+          alert("E-mail ja cadastrado")
+        }
+        else {
+
+          alert(errorCode + "::" + errorMessage)
+        }
       });
   };
 
@@ -192,20 +186,6 @@ export default function SignUp() {
                   autoFocus
                 />
               </Grid>
-
-              {/* <Grid item xs={12}>
-                <TextField
-                  error={formNascimentoError}
-                  helperText={formNascimentoError ? "Data de nascimento Invalida" : ""}
-                  autoComplete="given-name"
-                  name="nascimento"
-                  required
-                  fullWidth
-                  id="nascimento"
-                  label="Data Nascimento"
-                  autoFocus
-                />
-              </Grid> */}
 
               <Grid item xs={12}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -261,7 +241,7 @@ export default function SignUp() {
                   fullWidth
                   name="password2"
                   label="Repita a senha"
-                  type="password2"
+                  type="password"
                   id="password2"
                   autoComplete="new-password"
                 />

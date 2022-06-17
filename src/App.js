@@ -6,8 +6,8 @@ import CheckoutProvider from './context-global/checkout.provider';
 
 function App() {
   return (
-    <div class="App">
-      <header class="App-header">
+    <div className="App">
+      <header className="App-header">
         <CheckoutProvider>
           <PublicRoutes />
           <Copyright sx={{ mt: 5 }} />
@@ -22,7 +22,7 @@ function Copyright(props) {
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
       {new Date().getFullYear()}
-      {'.'}
+      {'. versão 2.0.22'}
     </Typography>
   );
 }

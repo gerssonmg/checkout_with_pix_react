@@ -1,16 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://",
+  baseURL: "https://api.mercadopago.com/",
 });
 
 api.interceptors.request.use(async config => {
-  // Declaramos um token manualmente para teste.
-  const token = "APP_USR-4281159543020715-052201-196ad55eb926e868b4f655100b9a2344-141342279";
-
+  const token = "APP_USR-4602688415278600-061617-55322dfe0ed3b4d240adce1c8edacb2c-141342279";
 
   config.headers.Authorization = `Bearer ${token}`;
-
 
   return config;
 });

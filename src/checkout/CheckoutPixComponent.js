@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import { useLocation } from 'react-router-dom';
 
-import { getDatabase, set, update, ref, onValue } from "firebase/database";
+import { getDatabase, set, update, ref, get, child, onValue } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 
@@ -29,8 +29,11 @@ export default function CheckoutPixComponent() {
   const [userEmail, setUserEmail] = useState("")
   const [userCpf, setUserCpf] = useState("")
   const [userNascimento, setUserNascimento] = useState("")
+  const [isDateUserCorrect, setIsDateUserCorrect] = useState(false)
 
   const [idByURL_UseState, setIdByURL_UseState] = useState("")
+
+  const [existCheckoutOpenCPF, setExistCheckoutOpenCPF] = useState(false)
 
   useEffect(() => {
     const idByUrl = location.pathname.split("/")
@@ -60,7 +63,97 @@ export default function CheckoutPixComponent() {
 
   const auth = getAuth();
 
+  function existCheckoutOpenForCPF() {
 
+    let exist = false
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, `users/${user.uid}/bilhetes_online`)).then((snapshot) => {
+
+          if (!snapshot.exists()) {
+            requestMercadoPago()
+          }
+
+          else {
+
+            const data = snapshot.val();
+
+            Object.entries(data).map((item) => {
+              if (item[1].CPF === userCpf && item[1].idBilhete === bilheteSelected[0][0]) {
+                exist = true
+                setExistCheckoutOpenCPF(true)
+              }
+              return null
+            })
+
+            if (exist === false) {
+              requestMercadoPago()
+            }
+          }
+
+        });
+      }
+    });
+
+    return null
+  }
+
+
+  function requestMercadoPago() {
+    const body =
+    {
+      "transaction_amount": bilheteSelected[0][1]?.valor || 10,
+      "description": bilheteSelected[0][1]?.describe || "Ingresso valido para entrada ate as 16hrs",
+      "payment_method_id": "pix",
+      "payer": {
+        "email": userEmail,
+        "first_name": userName,
+        "last_name": userName,
+        "identification": {
+          "type": "CPF",
+          "number": userCpf
+        }
+      },
+      "notification_url": "https://us-central1-expomontes2022.cloudfunctions.net/addMessage"
+    }
+
+    api
+      .post("v1/payments", body)
+      .then((response) => {
+        const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
+
+        const id_transation = response.data.id
+
+        const db = getDatabase();
+
+        printy(id_transation)
+
+        onAuthStateChanged(auth, (user) => {
+
+          set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+            valor: bilheteSelected[0][1]?.valor || 10,
+            status: 0,
+            CPF: userCpf,
+            nascimento: userNascimento,
+            Nome: userName,
+            qr_code: `ON????${id_transation}????${user.uid}`,
+            idBilhete: idByURL_UseState,
+            link_checkout: ticket_url
+          }).then(() => {
+            // history.push('/perfil')
+          });
+
+        });
+
+        setBuyForMercadoPago(ticket_url)
+      }
+      )
+      .catch((err) => {
+        console.error("ops! ocorreu um erro" + err);
+      });
+  }
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -82,103 +175,24 @@ export default function CheckoutPixComponent() {
 
 
   useEffect(() => {
+
     if (bilheteSelected && userEmail && userCpf) {
-      const body =
-      {
-        "transaction_amount": bilheteSelected[0][1]?.valor || 10,
-        "description": bilheteSelected[0][1]?.describe || "Ingresso valido para entrada ate as 16hrs",
-        "payment_method_id": "pix",
-        "payer": {
-          "email": userEmail,
-          "first_name": userName,
-          "last_name": userName,
-          "identification": {
-            "type": "CPF",
-            "number": userCpf
-          }
-        },
-        "notification_url": "https://us-central1-expomontes2022.cloudfunctions.net/addMessage"
+
+      if (isDateUserCorrect) {
+        existCheckoutOpenForCPF()
       }
-
-
-      console.log("API")
-      console.log(api)
-      api.get(`https://jsonplaceholder.typicode.com/users`)
-        .then(res => {
-          const persons = res.data;
-          console.log('persons')
-          console.log(persons)
-        })
-
-
-      api
-        .get(`api.mercadopago.com/v1/payments/23208174649`)
-        .then(response => {
-
-          console.log('response GET MERCADO')
-          console.log(response)
-
-
-        })
-        .catch(() => { })
-
-      const sendGetRequest = async () => {
-        try {
-          const resp = await api
-            .post("api.mercadopago.com/v1/payments", body)
-            .then((response) => {
-              console.log('response')
-              console.log(response)
-              const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
-
-              const id_transation = response.data.id
-
-              const db = getDatabase();
-
-              printy(id_transation)
-
-              onAuthStateChanged(auth, (user) => {
-
-                set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
-                  valor: bilheteSelected[0][1]?.valor || 10,
-                  status: 0,
-                  CPF: userCpf,
-                  nascimento: userNascimento,
-                  Nome: userName,
-                  qr_code: `ON????${id_transation}????${user.uid}`,
-                  idBilhete: idByURL_UseState,
-                  link_checkout: ticket_url
-                }).then(() => {
-                  // history.push('/perfil')
-                });
-
-              });
-
-              setBuyForMercadoPago(ticket_url)
-            }
-            )
-            .catch((err) => {
-              console.error("ops! ocorreu um erro" + err);
-            });
-        } catch (err) {
-          // Handle Error Here
-          console.error("ZZZ");
-          console.error(err);
-        }
-      };
-
-      sendGetRequest()
     }
-  }, [bilheteSelected, userEmail, userCpf]);
+  }, [bilheteSelected, userEmail, userCpf, isDateUserCorrect]);
 
 
 
+  // Loop que verifica se ja foi pago
   function waitforme(milisec, id_transation) {
     return new Promise(resolve => {
       setTimeout(() => {
         resolve('')
         api
-          .get(`api.mercadopago.com/v1/payments/${id_transation}`)
+          .get(`v1/payments/${id_transation}`)
           .then(response => {
 
             const status = response.data.status
@@ -203,14 +217,34 @@ export default function CheckoutPixComponent() {
   async function printy(id_transation) {
     for (let i = 0; i < 10; ++i) {
       await waitforme(10000, id_transation);
-      console.log(i);
     }
-    console.log("Loop execution finished!)");
   }
 
 
   return <>
-    <Button variant="contained" onClick={() => history.push('/')}> {"<-"} Voltar</Button>
+    <Box mt={4} mb={4}>
+      <Button variant="contained" onClick={() => history.push('/')}> {"<-"} Voltar</Button>
+    </Box>
+
+    {
+      (!buyForMercadoPago && !existCheckoutOpenCPF) && (
+
+        <Box>
+
+          <Box mb={2} style={{ border: "1px solid #535353", fontSize: "20px" }} >
+            Verifique os dados a baixo.
+            <br />
+            Na portaria, sera solicitado
+            <br />
+            os documentos para comprovar os dados
+          </Box>
+
+          <Box mt={4} mb={4}>
+            <Button variant="contained" onClick={() => setIsDateUserCorrect(true)}> Clique aqui para continuar</Button>
+          </Box>
+        </Box>
+      )
+    }
 
     <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", paddingBottom: "20px", marginBottom: "20px", paddingTop: "20px" }}>
 
@@ -270,16 +304,45 @@ export default function CheckoutPixComponent() {
     </Container>
 
     {
+      existCheckoutOpenCPF && (
+
+        <Box>
+
+          <Box mb={2} style={{ border: "1px solid #535353", fontSize: "20px" }} >
+            Existe um pagamento de bilhete
+            <br />
+            Pendende para esse CPF. Acesse o
+            <br />
+            Perfil, para Pagar esse bilhete
+          </Box>
+
+          <Box mt={4} mb={4}>
+            <Button variant="contained" onClick={() => history.push('/perfil')}> Ir para Perfil</Button>
+          </Box>
+        </Box>
+      )
+    }
+
+
+    {
       buyForMercadoPago &&
 
+      <Box>
 
-      <Box display="flex">
-        <iframe src={buyForMercadoPago} width="400px" height="620px" title="description"></iframe>
+        <Box mb={2} style={{ border: "1px solid #535353", fontSize: "20px" }} >
+          Aguardando confirmação de pagamento....
+        </Box>
+
+        <Box mt={4} mb={4}>
+          <Button variant="contained" onClick={() => history.push('/perfil')}> Se ja pagou. Clique aqui para atualizar</Button>
+        </Box>
+
+        <Box display="flex">
+          <iframe src={buyForMercadoPago} width="400px" height="620px" title="description"></iframe>
+        </Box>
+
       </Box>
     }
-    <Box mt={5} style={{ border: "1px solid #535353", fontSize: "20px" }} >
-      Aguardando confirmação de pagamento....
-    </Box>
 
   </>
 }

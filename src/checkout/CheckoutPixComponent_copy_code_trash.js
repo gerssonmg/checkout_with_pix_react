@@ -45,7 +45,7 @@ export default function CheckoutPixComponent({ setShowStory, setShowPixComponent
 
   useEffect(() => {
     api
-      .post("api.mercadopago.com/v1/payments", body)
+      .post("v1/payments", body)
       .then((response) => {
         const ticket_url = response.data.point_of_interaction.transaction_data.ticket_url
 

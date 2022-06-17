@@ -103,7 +103,6 @@ const schemaDBBilhetes = {
 
 export function writeBilhetesSchema() {
   const db = getDatabase();
-  console.log(db)
   set(ref(db, 'venda_online/bilhetes/expomontes2022/'), schemaDBBilhetes);
 }
 
@@ -148,6 +147,5 @@ const schemaDBUsuarioResponsavel = {
 
 function writeUserData() {
   const db = getDatabase();
-  console.log(db)
   set(ref(db, 'ROOT/users/'), [schemaDBUsuarioResponsavel]);
 }

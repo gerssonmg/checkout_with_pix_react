@@ -27,15 +27,11 @@ export default function App() {
 
   const db = getDatabase();
 
-  console.log("V02")
   useEffect(() => {
-    console.log("AQUI00")
+
     if (arrayBilhetes.length == 0) {
 
-      console.log("AQUI")
-
       const starCountRef = ref(db, 'venda_online/bilhetes/expomontes2022');
-      console.log(starCountRef)
       onValue(starCountRef, (snapshot) => {
         const data = snapshot.val();
 
@@ -43,7 +39,6 @@ export default function App() {
         Object.entries(data).map((item) => {
           arr.push([item[0], item[1]])
         })
-        console.log(arr)
         setArrayBilhetes(arr)
 
       });
@@ -58,7 +53,7 @@ export default function App() {
 
 
   return (
-    <div class="App App-header">
+    <div className="App App-header">
       <>
         {checkout?.id}
         Eventos na sua cidade: Montes Claros
