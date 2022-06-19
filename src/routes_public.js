@@ -6,11 +6,15 @@ import SignupComponent from './sign-up/signup.component';
 import PartiesListComponent from './home/parties-list.component';
 import Profile from './profile/profile.component'
 import CheckoutPixComponent from './checkout/CheckoutPixComponent';
+import ResetPassword from './reset_password/reset-password.component';
+
 
 export default function PublicRoutes() {
   return (
     <Switch>
       <Route exact path="/login" component={LoginComponent} />
+
+      <Route exact path="/nova-senha" component={ResetPassword} />
 
       <Route
         exact
@@ -26,6 +30,7 @@ export default function PublicRoutes() {
         path="/comprar/:id"
         component={CheckoutPixComponent}
       />
+
       <Route
         path="/"
         component={PartiesListComponent}

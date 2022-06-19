@@ -139,12 +139,24 @@ export default function SignUp() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Button
-        variant="contained"
-        onClick={() => history.push('/')}
-      >
-        Voltar
-      </Button>
+
+      <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
+        <Box py={2} maxWidth="xs" display="flex" justifyContent="space-between">
+          <Button
+            variant="contained"
+            onClick={() => history.push('/')}
+          >
+            Voltar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => history.push('/login')}
+          >
+            Ja tem conta? Fazer login
+          </Button>
+        </Box>
+      </Container>
+
       <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -258,13 +270,7 @@ export default function SignUp() {
             >
               Cadastrar
             </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  Ja tem conta? Fazer login
-                </Link>
-              </Grid>
-            </Grid>
+
           </Box>
         </Box>
       </Container>

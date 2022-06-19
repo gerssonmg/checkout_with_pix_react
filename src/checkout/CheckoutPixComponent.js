@@ -132,6 +132,8 @@ export default function CheckoutPixComponent() {
 
         onAuthStateChanged(auth, (user) => {
 
+          // CRIANDO O BILHETE DE INTENÇÂO DE COMPRA
+          // NA ARVORE DO USUARIO
           set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
             valor: bilheteSelected[0][1]?.valor || 10,
             status: 0,
@@ -140,9 +142,9 @@ export default function CheckoutPixComponent() {
             Nome: userName,
             qr_code: `ON????${id_transation}????${user.uid}`,
             idBilhete: idByURL_UseState,
+            id_transation: id_transation,
             link_checkout: ticket_url
           }).then(() => {
-            // history.push('/perfil')
           });
 
         });
@@ -201,6 +203,14 @@ export default function CheckoutPixComponent() {
 
                 update(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
                   status: 1
+                }).then(() => {
+                });
+
+                set(ref(db, `abilhetes/${id_transation}`), {
+                  bilheteid: id_transation,
+                  cortesia: false,
+                  status: "1",
+                  usuarioid: user.uid
                 }).then(() => {
                   history.push('/perfil')
                 });

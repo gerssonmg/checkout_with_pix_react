@@ -10,7 +10,7 @@ function App() {
       <header className="App-header">
         <CheckoutProvider>
           <PublicRoutes />
-          <Copyright sx={{ mt: 5 }} />
+          <Copyright sx={{ mt: 3 }} />
         </CheckoutProvider>
       </header>
     </div>
@@ -19,10 +19,10 @@ function App() {
 
 function Copyright(props) {
   return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+    <Typography variant="body2" color="#b9b9b9" align="center" {...props}>
       {'Copyright © '}
       {new Date().getFullYear()}
-      {'. versão 2.0.22'}
+      {'. versão 2.0.22.5'}
     </Typography>
   );
 }

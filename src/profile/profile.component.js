@@ -8,12 +8,13 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
+import { getDatabase, update, set, ref, onValue } from "firebase/database";
 import QRCode from 'qrcode'
 import { useHistory } from 'react-router-dom';
 import CheckoutContext from '../context-global/checkout.context';
 import { QRCodeCanvas } from 'qrcode.react';
+import api from "../services/api";
 
 const theme = createTheme();
 
@@ -68,38 +69,77 @@ export default function ProfileComponent() {
 
   }, [auth])
 
-  function convertStatus(status) {
+  function convertStatus(status, qrCode) {
     if (status === 0) {
       return "Pagamento pendente"
-    } else if (status === 1) {
+    } else if (status === 1 && qrCode !== "") {
       return "Disponivel"
-    } else if (status === 2) {
+    }
+    else if (status === 1 && qrCode === "") {
+      return "Ja foi utilizado"
+    }
+    else if (status === 2) {
       return "Ja foi utilizado"
     }
   }
 
-  // function verificationPayment() {
-  //   api
-  //     .get(`v1/payments/${id_transation}`)
-  //     .then(response => {
+  function getQrCode(id_transation) {
+    console.log("AQUI")
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const db = getDatabase();
+        const starCountRef = ref(db, 'abilhetes/' + id_transation);
+        onValue(starCountRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            setQrCode(`${data.bilheteid}`)
+          } else {
+            setQrCode("")
+          }
+        });
+      }
+    });
+  }
 
-  //       const status = response.data.status
-  //       if (status === "approved") {
-  //         onAuthStateChanged(auth, (user) => {
 
-  //           update(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
-  //             status: 1
-  //           }).then(() => {
-  //             history.push('/perfil')
-  //           });
+  function verificationPayment(id_transation) {
 
-  //         })
-  //       }
+    const db = getDatabase();
 
-  //     })
-  //     .catch(() => { })
+    api
+      .get(`v1/payments/${id_transation}`)
+      .then(response => {
 
-  // }
+        const status = response.data.status
+        if (status === "approved") {
+          onAuthStateChanged(auth, (user) => {
+
+            update(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
+              status: 1
+            }).then(() => {
+              alert("Pagamento identificado com sucesso")
+            });
+
+
+            set(ref(db, `abilhetes/${id_transation}`), {
+
+              bilheteid: id_transation,
+              cortesia: false,
+              status: "1",
+              usuarioid: user.uid
+            }).then(() => {
+            });
+
+
+          })
+        } else {
+          alert("Pagamento ainda não identificado. Tente novamente mais tarde.")
+        }
+
+      })
+      .catch(() => { })
+
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -195,6 +235,7 @@ export default function ProfileComponent() {
 
           {
             bilhetesOnlineByUser.map((item, index) => {
+
               return (
                 <Box key={index}>
                   <hr size="1" width="100%"></hr>
@@ -225,32 +266,41 @@ export default function ProfileComponent() {
 
                   <Typography style={{ color: "#000" }}>
                     Status: {
-                      convertStatus(item.status)
+                      convertStatus(item.status, qrCode)
                     }
                   </Typography>
 
+                  {
+                    item.status !== 0 && getQrCode(item.id_transation)
+                  }
 
                   {
-                    item.status !== 0 && (
+                    item.status !== 0 && qrCode !== "" && (
                       <Box>
                         <Typography style={{ color: "#000" }}>
                           QR Code
                         </Typography>
-                        <QRCodeCanvas value={item.qr_code} />
+                        <QRCodeCanvas value={qrCode} />
+                        <Typography style={{ color: "#000" }}>
+                          00X{qrCode}ZYT
+                        </Typography>
                       </Box>
                     )
                   }
 
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                    onClick={() => history.push('/')}
-                  >
-                    Se ja pagou <br />
-                    clique aqui para verificarmos
-                  </Button>
+                  {
+                    item.status === 0 &&
+                    <Button
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      sx={{ mt: 3, mb: 2 }}
+                      onClick={() => verificationPayment(item.id_transation)}
+                    >
+                      Se ja pagou <br />
+                      clique aqui para verificarmos
+                    </Button>
+                  }
 
                 </Box>)
             })
