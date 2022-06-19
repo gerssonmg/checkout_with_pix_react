@@ -9,12 +9,24 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
-import { getDatabase, update, set, ref, onValue } from "firebase/database";
-import QRCode from 'qrcode'
+import { getDatabase, get, child, update, set, ref, onValue } from "firebase/database";
+
 import { useHistory } from 'react-router-dom';
 import CheckoutContext from '../context-global/checkout.context';
-import { QRCodeCanvas } from 'qrcode.react';
+import QRCode, { QRCodeCanvas } from 'qrcode.react';
 import api from "../services/api";
+
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 
 const theme = createTheme();
 
@@ -33,6 +45,11 @@ export default function ProfileComponent() {
   const [userNascimento, setUserNascimento] = useState("")
   const [bilhetesOnlineByUser, setBilhetesOnlineByUser] = useState([])
   const [qrCode, setQrCode] = useState("")
+
+  const [formUpdateUserName, setFormUpdateUserName] = useState("")
+  const [formUpdateUserCPF, setFormUpdateUserCPF] = useState("")
+  const [formUpdateUserNascimento, setFormUpdateUserNascimento] = useState("")
+
 
   const auth = getAuth();
   const callSingOut = () => {
@@ -55,6 +72,10 @@ export default function ProfileComponent() {
           setUserName(data?.firstName)
           setUserNascimento(data?.nascimento)
           setUserEmail(data?.email)
+
+          setFormUpdateUserCPF(data?.cpf)
+          setFormUpdateUserName(data?.firstName)
+          setFormUpdateUserNascimento(data?.nascimento)
 
           const arr = []
           Object.entries(data.bilhetes_online).map((item) => {
@@ -83,22 +104,52 @@ export default function ProfileComponent() {
     }
   }
 
-  function getQrCode(id_transation) {
+  const [qrcodeFinal, setQrcodeFinal] = useState("")
+  const [showDialogQrCode, setShowDialogQrCode] = useState(false)
+
+  useEffect(() => {
+
+    console.log('qrcodeFinal')
+    console.log(qrcodeFinal)
+    if (qrcodeFinal !== "")
+      setShowDialogQrCode(true)
+
+  }, [qrcodeFinal]);
+
+  const verQrCode = async (id_transation) => {
+    let qrcode = ""
     console.log("AQUI")
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const db = getDatabase();
-        const starCountRef = ref(db, 'abilhetes/' + id_transation);
-        onValue(starCountRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            setQrCode(`${data.bilheteid}`)
-          } else {
-            setQrCode("")
-          }
-        });
-      }
+    console.log(id_transation)
+
+    setQrcodeFinal(false)
+    // const db = getDatabase();
+    // const starCountRef = ref(db, 'abilhetes/' + id_transation);
+    // let response = onValue(starCountRef, (snapshot) => {
+    //   const data = snapshot.val();
+    //   if (data) {
+    //     // setQrCode(`${data.bilheteid}`)
+    //     console.log("AQUI2")
+    //     qrcode = data.bilheteid
+    //   } else {
+    //     // setQrCode("")
+    //   }
+    //   return data.bilheteid
+    // });
+
+    const dbRef = ref(getDatabase());
+    await get(child(dbRef, 'abilhetes/' + id_transation)).then((snapshot) => {
+
+      const data = snapshot.val();
+
+      setQrcodeFinal(data.bilheteid)
+      // setShowDialogQrCode(true)
+      // console.log(data.bilheteid)
     });
+
+    // console.log('response')
+    // // console.log(response)
+    // console.log("AQUI")
+    // return qrcode
   }
 
 
@@ -141,9 +192,82 @@ export default function ProfileComponent() {
 
   }
 
+
+  const [Xopen, setXOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setXOpen(true);
+  };
+
+  const handleClose = () => {
+    setXOpen(false);
+  };
+
+  function EditDialog() {
+    return (
+      <div>
+
+        <Dialog open={Xopen} onClose={handleClose}>
+          <DialogTitle>Edite seus dados</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              To subscribe to this website, please enter your email address here. We
+              will send updates occasionally.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Nome"
+              type="email"
+              fullWidth
+              variant="standard"
+              value={formUpdateUserName}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="CPF"
+              type="email"
+              fullWidth
+              variant="standard"
+              value={formUpdateUserCPF}
+            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Data de Nascimento"
+                value={formUpdateUserNascimento}
+                onChange={(newValue) => {
+                  setFormUpdateUserNascimento(newValue);
+                }}
+                renderInput={(params) =>
+                  <TextField
+                    // error={formNascimentoError}
+                    // helperText={formNascimentoError ? "Data de nascimento Invalida" : ""}
+
+                    {...params}
+                  />
+                }
+              />
+            </LocalizationProvider>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancelar</Button>
+            <Button onClick={handleClose}>Continuar</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    )
+  }
   return (
     <ThemeProvider theme={theme}>
       {checkout}
+
+      <EditDialog />
+      <Button variant="outlined" onClick={() => setXOpen(true)}>
+        Open form dialog
+      </Button>
       <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -232,7 +356,11 @@ export default function ProfileComponent() {
           <Typography component="h1" variant="h5" style={{ color: "#000" }}>
             Seus ingressos:
           </Typography>
+          <Typography component="h1" variant="body1" style={{ color: "#000" }}>
+            Apresente seu QRcode na portaria do evento
+          </Typography>
 
+          <br />
           {
             bilhetesOnlineByUser.map((item, index) => {
 
@@ -266,12 +394,17 @@ export default function ProfileComponent() {
 
                   <Typography style={{ color: "#000" }}>
                     Status: {
-                      convertStatus(item.status, qrCode)
+                      convertStatus(item.status, qrcodeFinal)
                     }
                   </Typography>
 
-                  {
+                  {/* {
                     item.status !== 0 && getQrCode(item.id_transation)
+                  } */}
+
+                  {
+
+                    item.status !== 0 && < Button onClick={() => verQrCode(item.id_transation)}>Ver QRcode</Button>
                   }
 
                   {
@@ -280,12 +413,24 @@ export default function ProfileComponent() {
                         <Typography style={{ color: "#000" }}>
                           QR Code
                         </Typography>
-                        <QRCodeCanvas value={qrCode} />
+                        <QRCodeCanvas value={qrcodeFinal} />
                         <Typography style={{ color: "#000" }}>
-                          00X{qrCode}ZYT
+                          00X{qrcodeFinal}ZYT
                         </Typography>
                       </Box>
                     )
+                  }
+
+                  {
+                    <Dialog
+                      open={qrcodeFinal !== "" && showDialogQrCode}
+                      onClose={() => setShowDialogQrCode(false)}
+                    >
+                      <DialogContent>
+                        {/*value should string */}
+                        <QRCodeCanvas value={"" + qrcodeFinal} />
+                      </DialogContent>
+                    </Dialog>
                   }
 
                   {
@@ -306,6 +451,8 @@ export default function ProfileComponent() {
             })
           }
         </Box>
+        <br />
+        <br />
       </Container>
     </ThemeProvider >
   );
