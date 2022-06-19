@@ -23,6 +23,8 @@ function Copyright(props) {
       {'Copyright © '}
       {new Date().getFullYear()}
       {'. versão 2.0.22.5'}
+      <br />
+      <br />
     </Typography>
   );
 }

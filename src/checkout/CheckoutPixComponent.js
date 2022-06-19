@@ -139,7 +139,7 @@ export default function CheckoutPixComponent() {
             status: 0,
             CPF: userCpf,
             nascimento: userNascimento,
-            Nome: userName,
+            firstName: userName,
             qr_code: `ON????${id_transation}????${user.uid}`,
             idBilhete: idByURL_UseState,
             id_transation: id_transation,

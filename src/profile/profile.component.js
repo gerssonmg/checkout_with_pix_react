@@ -13,7 +13,7 @@ import { getDatabase, get, child, update, set, ref, onValue } from "firebase/dat
 
 import { useHistory } from 'react-router-dom';
 import CheckoutContext from '../context-global/checkout.context';
-import QRCode, { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import api from "../services/api";
 
 import Dialog from '@mui/material/Dialog';
@@ -27,6 +27,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+import { format } from 'date-fns';
+import { nameIsValid, isCpfValid, } from '../sign-up/validators';
 
 const theme = createTheme();
 
@@ -44,12 +46,6 @@ export default function ProfileComponent() {
   const [userCpf, setUserCpf] = useState("")
   const [userNascimento, setUserNascimento] = useState("")
   const [bilhetesOnlineByUser, setBilhetesOnlineByUser] = useState([])
-  const [qrCode, setQrCode] = useState("")
-
-  const [formUpdateUserName, setFormUpdateUserName] = useState("")
-  const [formUpdateUserCPF, setFormUpdateUserCPF] = useState("")
-  const [formUpdateUserNascimento, setFormUpdateUserNascimento] = useState("")
-
 
   const auth = getAuth();
   const callSingOut = () => {
@@ -73,10 +69,6 @@ export default function ProfileComponent() {
           setUserNascimento(data?.nascimento)
           setUserEmail(data?.email)
 
-          setFormUpdateUserCPF(data?.cpf)
-          setFormUpdateUserName(data?.firstName)
-          setFormUpdateUserNascimento(data?.nascimento)
-
           const arr = []
           Object.entries(data.bilhetes_online).map((item) => {
             arr.push({ ...item[1] })
@@ -93,10 +85,10 @@ export default function ProfileComponent() {
   function convertStatus(status, qrCode) {
     if (status === 0) {
       return "Pagamento pendente"
-    } else if (status === 1 && qrCode !== "") {
+    } else if (status === 1 && qrCode !== "" && qrCode !== "utilizado") {
       return "Disponivel"
     }
-    else if (status === 1 && qrCode === "") {
+    else if (status === 1 && qrCode === "utilizado") {
       return "Ja foi utilizado"
     }
     else if (status === 2) {
@@ -109,47 +101,26 @@ export default function ProfileComponent() {
 
   useEffect(() => {
 
-    console.log('qrcodeFinal')
-    console.log(qrcodeFinal)
-    if (qrcodeFinal !== "")
+    if (qrcodeFinal !== "" && qrcodeFinal !== "utilizado")
       setShowDialogQrCode(true)
 
   }, [qrcodeFinal]);
 
   const verQrCode = async (id_transation) => {
-    let qrcode = ""
-    console.log("AQUI")
-    console.log(id_transation)
 
-    setQrcodeFinal(false)
-    // const db = getDatabase();
-    // const starCountRef = ref(db, 'abilhetes/' + id_transation);
-    // let response = onValue(starCountRef, (snapshot) => {
-    //   const data = snapshot.val();
-    //   if (data) {
-    //     // setQrCode(`${data.bilheteid}`)
-    //     console.log("AQUI2")
-    //     qrcode = data.bilheteid
-    //   } else {
-    //     // setQrCode("")
-    //   }
-    //   return data.bilheteid
-    // });
+    setQrcodeFinal("")
 
     const dbRef = ref(getDatabase());
     await get(child(dbRef, 'abilhetes/' + id_transation)).then((snapshot) => {
 
-      const data = snapshot.val();
-
-      setQrcodeFinal(data.bilheteid)
-      // setShowDialogQrCode(true)
-      // console.log(data.bilheteid)
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setQrcodeFinal(data.bilheteid)
+      } else {
+        setQrcodeFinal("utilizado")
+      }
     });
 
-    // console.log('response')
-    // // console.log(response)
-    // console.log("AQUI")
-    // return qrcode
   }
 
 
@@ -189,85 +160,26 @@ export default function ProfileComponent() {
 
       })
       .catch(() => { })
-
   }
 
+  const [openEditUser, setOpenEditUser] = useState(false);
+  const [openEditBilhete, setOpenEditBilhete] = useState(false);
 
-  const [Xopen, setXOpen] = useState(false);
 
-  const handleClickOpen = () => {
-    setXOpen(true);
-  };
-
-  const handleClose = () => {
-    setXOpen(false);
-  };
-
-  function EditDialog() {
-    return (
-      <div>
-
-        <Dialog open={Xopen} onClose={handleClose}>
-          <DialogTitle>Edite seus dados</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              To subscribe to this website, please enter your email address here. We
-              will send updates occasionally.
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Nome"
-              type="email"
-              fullWidth
-              variant="standard"
-              value={formUpdateUserName}
-            />
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="CPF"
-              type="email"
-              fullWidth
-              variant="standard"
-              value={formUpdateUserCPF}
-            />
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Data de Nascimento"
-                value={formUpdateUserNascimento}
-                onChange={(newValue) => {
-                  setFormUpdateUserNascimento(newValue);
-                }}
-                renderInput={(params) =>
-                  <TextField
-                    // error={formNascimentoError}
-                    // helperText={formNascimentoError ? "Data de nascimento Invalida" : ""}
-
-                    {...params}
-                  />
-                }
-              />
-            </LocalizationProvider>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancelar</Button>
-            <Button onClick={handleClose}>Continuar</Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    )
-  }
   return (
     <ThemeProvider theme={theme}>
       {checkout}
 
-      <EditDialog />
-      <Button variant="outlined" onClick={() => setXOpen(true)}>
-        Open form dialog
-      </Button>
+      {
+        openEditUser && <EditDialog
+          name={userName}
+          cpf={userCpf}
+          nascimento={userNascimento}
+          setOpen={setOpenEditUser}
+          open={openEditUser}
+        />
+      }
+
       <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", marginBottom: "20px", marginTop: "20px" }}>
         <CssBaseline />
         <Box
@@ -280,6 +192,9 @@ export default function ProfileComponent() {
         >
           <Typography component="h1" variant="h5" style={{ color: "#000" }}>
             Seus Dados
+            <Button style={{ marginLeft: "8px" }} variant="outlined" onClick={() => setOpenEditUser(true)}>
+              Atualizar Dados
+            </Button>
           </Typography>
           <Box component="form" noValidate sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -367,6 +282,23 @@ export default function ProfileComponent() {
               return (
                 <Box key={index}>
                   <hr size="1" width="100%"></hr>
+                  <Button
+                    size="small"
+                    style={{ marginLeft: "8px" }}
+                    variant="outlined"
+                    onClick={() => setOpenEditBilhete(true)}>
+                    Atualizar dados do bilhete
+                  </Button>
+                  {
+                    openEditBilhete && <EditDialog
+                      name={item.Nome}
+                      cpf={item.CPF}
+                      nascimento={item.nascimento}
+                      setOpen={setOpenEditBilhete}
+                      id_transation={item.id_transation}
+                      open={openEditBilhete}
+                    />
+                  }
                   <Typography style={{ color: "#000" }}>
                     Nome: {item.Nome}
                   </Typography>
@@ -392,33 +324,20 @@ export default function ProfileComponent() {
                       </Link>
                     )}
 
-                  <Typography style={{ color: "#000" }}>
-                    Status: {
-                      convertStatus(item.status, qrcodeFinal)
-                    }
-                  </Typography>
-
-                  {/* {
-                    item.status !== 0 && getQrCode(item.id_transation)
-                  } */}
-
                   {
-
-                    item.status !== 0 && < Button onClick={() => verQrCode(item.id_transation)}>Ver QRcode</Button>
+                    qrcodeFinal !== "" && <Typography style={{ color: "#000" }}>
+                      Status: {
+                        convertStatus(item.status, qrcodeFinal)
+                      }
+                    </Typography>
                   }
 
                   {
-                    item.status !== 0 && qrCode !== "" && (
-                      <Box>
-                        <Typography style={{ color: "#000" }}>
-                          QR Code
-                        </Typography>
-                        <QRCodeCanvas value={qrcodeFinal} />
-                        <Typography style={{ color: "#000" }}>
-                          00X{qrcodeFinal}ZYT
-                        </Typography>
-                      </Box>
-                    )
+
+                    item.status !== 0 && <Button
+                      onClick={() => verQrCode(item.id_transation)}>
+                      Clique aqui para ver o QRcode
+                    </Button>
                   }
 
                   {
@@ -456,4 +375,113 @@ export default function ProfileComponent() {
       </Container>
     </ThemeProvider >
   );
+}
+
+function EditDialog({ name, cpf, nascimento, open, setOpen, id_transation = 0 }) {
+
+
+  const [formUpdateUserName, setFormUpdateUserName] = useState(name)
+  const [formUpdateUserCPF, setFormUpdateUserCPF] = useState(cpf)
+  const [formUpdateUserNascimento, setFormUpdateUserNascimento] = useState(nascimento)
+
+  const db = getDatabase();
+
+  const auth = getAuth();
+
+  const updateUser = () => {
+
+    if (!nameIsValid(formUpdateUserName)) {
+      alert("Preencha nome completo")
+      return null
+    }
+
+
+    if (!isCpfValid(formUpdateUserCPF)) {
+      alert("CPF invalido")
+      return null
+    }
+
+    if (!formUpdateUserNascimento) {
+      alert("Data nascimento invalida")
+      return null
+    }
+    onAuthStateChanged(auth, (user) => {
+
+      const pathEdit = id_transation === 0 ?
+        `users/${user.uid}/` :
+        `users/${user.uid}/bilhetes_online/${id_transation}`
+      console.log(formUpdateUserNascimento)
+
+      update(ref(db, pathEdit), {
+        cpf: formUpdateUserCPF,
+        firstName: formUpdateUserName,
+        nascimento: formUpdateUserNascimento.length === 10 ?
+          formUpdateUserNascimento :
+          format(formUpdateUserNascimento, "dd-MM-yyyy"),
+      }).then(() => {
+        window.location.reload()
+      }).catch(err => {
+        alert(err)
+      });
+    })
+
+  }
+
+  return (
+    <div>
+
+      <Dialog open={open} onClose={() => setOpen(false)} >
+        <DialogTitle>Edite seus dados</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Apos editar, clique em salvar.
+          </DialogContentText>
+          <form id="myform" component="form" noValidate sx={{ mt: 3 }}>
+            <TextField
+              autoFocus
+              id="name"
+              label="Nome"
+              fullWidth
+              onChange={e => {
+                e.preventDefault();
+                setFormUpdateUserName(e.target.value)
+
+              }}
+              value={formUpdateUserName}
+            />
+            <TextField
+              margin="dense"
+              id="CPF"
+              fullWidth
+              onChange={e => {
+                e.preventDefault();
+                setFormUpdateUserCPF(e.target.value)
+              }}
+              value={formUpdateUserCPF}
+            />
+            <br />
+            <br />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Data de Nascimento"
+                value={formUpdateUserNascimento}
+                onChange={(newValue) => {
+                  setFormUpdateUserNascimento(newValue);
+                }}
+                renderInput={(params) =>
+                  <TextField
+                    {...params}
+                  />
+                }
+              />
+            </LocalizationProvider>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button onClick={() => updateUser()}>Atualizar</Button>
+        </DialogActions>
+      </Dialog>
+    </div >
+  )
 }
