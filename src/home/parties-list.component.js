@@ -88,7 +88,6 @@ export default function App() {
                       {item[1]?.title}
                     </Box>
                     <Box style={{ fontSize: "20px", color: "#e60d1e" }} display="flex">
-                      {/* Ingresso valido para entrada ate as 16hrs */}
                       {item[1]?.describe}
                     </Box>
                     <Box style={{ fontSize: "30px", color: "#9c1" }} display="flex">
