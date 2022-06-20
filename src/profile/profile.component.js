@@ -412,6 +412,15 @@ function EditDialog({ name, cpf, nascimento, open, setOpen, id_transation = 0 })
         `users/${user.uid}/bilhetes_online/${id_transation}`
       console.log(formUpdateUserNascimento)
 
+      set(ref(db, pathEdit + "/edicao/" + `/${new Date()}`), {
+        date: new Date(),
+        name: name,
+        CPF: cpf,
+        nascimento: nascimento,
+        id_transation: id_transation
+      }).then(() => { }).catch(err => console.log(err))
+
+
       update(ref(db, pathEdit), {
         cpf: formUpdateUserCPF,
         firstName: formUpdateUserName,

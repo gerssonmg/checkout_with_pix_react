@@ -11,7 +11,14 @@ import { useLocation } from 'react-router-dom';
 
 import { getDatabase, set, update, ref, get, child, onValue } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth"
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
+import {
+  nameIsValid,
+  isCpfValid,
+} from '../sign-up/validators';
 
 export default function CheckoutPixComponent() {
 
@@ -34,6 +41,14 @@ export default function CheckoutPixComponent() {
   const [idByURL_UseState, setIdByURL_UseState] = useState("")
 
   const [existCheckoutOpenCPF, setExistCheckoutOpenCPF] = useState(false)
+
+  const [comprarOutraPessoa, setComprarOutraPessoa] = useState(false);
+
+
+  const [nomeOutraPessoa, setNomeOutraPessoa] = useState("")
+  const [cpfOutraPessoa, setCpfOutraPessoa] = useState("")
+  const [nascimentoOutraPessoa, setNascimentoOutraPessoa] = useState("")
+  const [blockFormOutraPessoa, setBlockFormOutraPessoa] = useState(false)
 
   useEffect(() => {
     const idByUrl = location.pathname.split("/")
@@ -63,7 +78,7 @@ export default function CheckoutPixComponent() {
 
   const auth = getAuth();
 
-  function existCheckoutOpenForCPF() {
+  function existCheckoutOpenForCPF(bilheteParaOutra = false) {
 
     let exist = false
     onAuthStateChanged(auth, (user) => {
@@ -73,15 +88,21 @@ export default function CheckoutPixComponent() {
         get(child(dbRef, `users/${user.uid}/bilhetes_online`)).then((snapshot) => {
 
           if (!snapshot.exists()) {
-            requestMercadoPago()
+            requestMercadoPago(bilheteParaOutra)
           }
 
           else {
 
             const data = snapshot.val();
 
+
+            let cpf = userCpf
+            if (bilheteParaOutra) {
+              cpf = cpfOutraPessoa
+            }
+
             Object.entries(data).map((item) => {
-              if (item[1].CPF === userCpf && item[1].idBilhete === bilheteSelected[0][0]) {
+              if (item[1].CPF === cpf && item[1].status == 0 && item[1].idBilhete === bilheteSelected[0][0]) {
                 exist = true
                 setExistCheckoutOpenCPF(true)
               }
@@ -89,7 +110,11 @@ export default function CheckoutPixComponent() {
             })
 
             if (exist === false) {
-              requestMercadoPago()
+              if (existCheckoutOpenCPF) {
+                setExistCheckoutOpenCPF(false)
+              }
+
+              requestMercadoPago(bilheteParaOutra)
             }
           }
 
@@ -101,7 +126,7 @@ export default function CheckoutPixComponent() {
   }
 
 
-  function requestMercadoPago() {
+  function requestMercadoPago(bilheteParaOutra = false) {
     const body =
     {
       "transaction_amount": bilheteSelected[0][1]?.valor || 10,
@@ -109,11 +134,11 @@ export default function CheckoutPixComponent() {
       "payment_method_id": "pix",
       "payer": {
         "email": userEmail,
-        "first_name": userName,
-        "last_name": userName,
+        "first_name": bilheteParaOutra ? nomeOutraPessoa : userName,
+        "last_name": bilheteParaOutra ? nomeOutraPessoa : userName,
         "identification": {
           "type": "CPF",
-          "number": userCpf
+          "number": bilheteParaOutra ? cpfOutraPessoa : userCpf
         }
       },
       "notification_url": "https://us-central1-expomontes2022.cloudfunctions.net/addMessage"
@@ -137,19 +162,21 @@ export default function CheckoutPixComponent() {
           set(ref(db, `users/${user.uid}/bilhetes_online/${id_transation}/`), {
             valor: bilheteSelected[0][1]?.valor || 10,
             status: 0,
-            CPF: userCpf,
-            nascimento: userNascimento,
-            firstName: userName,
+            CPF: bilheteParaOutra ? cpfOutraPessoa : userCpf,
+            nascimento: bilheteParaOutra ? nascimentoOutraPessoa : userNascimento,
+            firstName: bilheteParaOutra ? nomeOutraPessoa : userName,
             qr_code: `ON????${id_transation}????${user.uid}`,
             idBilhete: idByURL_UseState,
             id_transation: id_transation,
-            link_checkout: ticket_url
+            link_checkout: ticket_url,
+            outraPessoa: bilheteParaOutra
           }).then(() => {
           });
 
         });
 
         setBuyForMercadoPago(ticket_url)
+        setBlockFormOutraPessoa(true)
       }
       )
       .catch((err) => {
@@ -187,6 +214,27 @@ export default function CheckoutPixComponent() {
   }, [bilheteSelected, userEmail, userCpf, isDateUserCorrect]);
 
 
+  const validFormOutraPessoa = () => {
+
+    if (!nameIsValid(nomeOutraPessoa)) {
+      alert("Nome imcompleto")
+      return null
+    }
+
+
+    if (!isCpfValid(cpfOutraPessoa)) {
+      alert("CPF invalido")
+      return null
+    }
+
+    if (!nascimentoOutraPessoa) {
+      alert("Informe data de Nascimento")
+      return null
+    }
+
+    const bilheteOutraPessoa = true
+    existCheckoutOpenForCPF(bilheteOutraPessoa)
+  }
 
   // Loop que verifica se ja foi pago
   function waitforme(milisec, id_transation) {
@@ -249,69 +297,114 @@ export default function CheckoutPixComponent() {
             os documentos para comprovar os dados
           </Box>
 
-          <Box mt={4} mb={4}>
-            <Button variant="contained" onClick={() => setIsDateUserCorrect(true)}> Clique aqui para continuar</Button>
-          </Box>
+          {
+            !comprarOutraPessoa &&
+            <Box mt={4} mb={4}>
+              <Button variant="contained" onClick={() => setIsDateUserCorrect(true)}> Clique aqui para continuar</Button>
+            </Box>
+          }
+
         </Box>
       )
     }
 
-    <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", paddingBottom: "20px", marginBottom: "20px", paddingTop: "20px" }}>
+    {
+      !comprarOutraPessoa && !isDateUserCorrect &&
+      <Box mt={1} mb={4}>
+        <Button
+          variant="contained"
+          onClick={() => setComprarOutraPessoa(true)}>
+          Comprar para outra pessoa
+        </Button>
+      </Box>
+    }
 
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <TextField
-            autoComplete="given-name"
-            name="firstName"
-            fullWidth
-            id="firstName"
-            label="Nome Completo"
-            autoFocus
-            disabled
-            value={userName}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            autoComplete="given-name"
-            name="cpf"
-            label="CPF"
-            fullWidth
-            id="cpf"
-            value={userCpf}
-            autoFocus
-            disabled
-          />
-        </Grid>
 
-        <Grid item xs={12}>
-          <TextField
-            autoComplete="given-name"
-            name="nascimento"
-            label="Data Nascimento"
-            fullWidth
-            id="nascimento"
-            value={userNascimento}
-            autoFocus
-            disabled
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="E-mail"
-            id="email"
-            name="email"
-            disabled
-            value={userEmail}
-          />
-        </Grid>
+    {
+      comprarOutraPessoa && <>
+        <FormComprarParaOutraPessoa
+          nomeOutraPessoa={nomeOutraPessoa}
+          setNomeOutraPessoa={setNomeOutraPessoa}
 
-        <Grid item xs={12}>
+          cpfOutraPessoa={cpfOutraPessoa}
+          setCpfOutraPessoa={setCpfOutraPessoa}
 
+          nascimentoOutraPessoa={nascimentoOutraPessoa}
+          setNascimentoOutraPessoa={setNascimentoOutraPessoa}
+
+          blockFormOutraPessoa={blockFormOutraPessoa}
+        />
+        {
+          !blockFormOutraPessoa &&
+          <Button
+            variant="contained"
+            onClick={() => validFormOutraPessoa()}>
+            Continuar
+          </Button>
+        }
+
+      </>
+    }
+
+    {
+      !comprarOutraPessoa &&
+      <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", paddingBottom: "20px", marginBottom: "20px", paddingTop: "20px" }}>
+
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              autoComplete="given-name"
+              name="firstName"
+              fullWidth
+              id="firstName"
+              label="Nome Completo"
+              autoFocus
+              disabled
+              value={userName}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              autoComplete="given-name"
+              name="cpf"
+              label="CPF"
+              fullWidth
+              id="cpf"
+              value={userCpf}
+              autoFocus
+              disabled
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              autoComplete="given-name"
+              name="nascimento"
+              label="Data Nascimento"
+              fullWidth
+              id="nascimento"
+              value={userNascimento}
+              autoFocus
+              disabled
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="E-mail"
+              id="email"
+              name="email"
+              disabled
+              value={userEmail}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    }
 
     {
       existCheckoutOpenCPF && (
@@ -355,4 +448,82 @@ export default function CheckoutPixComponent() {
     }
 
   </>
+}
+
+function FormComprarParaOutraPessoa(
+  {
+    nomeOutraPessoa,
+    setNomeOutraPessoa,
+
+    cpfOutraPessoa,
+    setCpfOutraPessoa,
+
+    nascimentoOutraPessoa,
+    setNascimentoOutraPessoa,
+
+    blockFormOutraPessoa
+  }
+) {
+
+
+
+  return (
+    <Container component="main" maxWidth="xs" style={{ backgroundColor: "#fff", paddingBottom: "20px", marginBottom: "20px", paddingTop: "20px" }}>
+
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            value={nomeOutraPessoa}
+            onChange={e => {
+              setNomeOutraPessoa(e.target.value)
+            }}
+            autoComplete="given-name"
+            name="firstName"
+            required
+            fullWidth
+            id="firstName"
+            label="Nome Completo"
+            autoFocus
+            disabled={blockFormOutraPessoa}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            value={cpfOutraPessoa}
+            onChange={e => {
+              setCpfOutraPessoa(e.target.value)
+            }}
+            autoComplete="given-name"
+            name="cpf"
+            required
+            fullWidth
+            id="cpf"
+            label="CPF"
+            autoFocus
+
+            disabled={blockFormOutraPessoa}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label="Data de Nascimento"
+
+              disabled={blockFormOutraPessoa}
+              value={nascimentoOutraPessoa}
+              onChange={(newValue) => {
+                setNascimentoOutraPessoa(newValue);
+              }}
+              renderInput={(params) =>
+                <TextField
+                  {...params}
+                />
+              }
+            />
+          </LocalizationProvider>
+        </Grid>
+      </Grid>
+    </Container>
+  )
 }

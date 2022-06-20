@@ -1,25 +1,26 @@
 # To-do
 
-Implementar Recuperar senha 2
+<!-- Implementar Recuperar senha 2 -->
 
-Confirmação dos dados, antes de requisitar compra de ingresso
+<!-- Confirmação dos dados, antes de requisitar compra de ingresso -->
 
-Não permitir gerar intenção de compra para mesmo dados. Deve mostrar a
-intenção ja existente
+<!-- Não permitir gerar intenção de compra para mesmo dados. Deve mostrar a
+intenção ja existente -->
 
-O app deve ser capaz de verificar se uma compra teve pagamento aprovado
+<!-- O app deve ser capaz de verificar se uma compra teve pagamento aprovado -->
 
-Na tela de perfil, deve ser possivel ver link de pagamento
+<!-- Na tela de perfil, deve ser possivel ver link de pagamento -->
 
-Na tela de perfil deve mostrar QRCode apenas para ingressos disponiveis
+<!-- Na tela de perfil deve mostrar QRCode apenas para ingressos disponiveis -->
 
-Implementar compra de ingressos para outras pessoas
+<!-- Implementar compra de ingressos para outras pessoas -->
 
-Listar outras pessoas "dependentes"
+<!-- Listar outras pessoas "dependentes" # Não foi implementado a ideia de dependente.
+Apenas compra de bilhetes com informações diferentes da pessoa que esta logada -->
 
-Implementar edição de dados dos usuarios
+<!-- Implementar edição de dados dos usuarios -->
 
-Edição de dados do comprador do ingresso
+<!-- Edição de dados do comprador do ingresso -->
 
 <!-- Validar formulario de sign-up 2 -->
 <!-- Validar formulario de login 2 -->
