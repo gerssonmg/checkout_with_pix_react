@@ -22,7 +22,7 @@ function Copyright(props) {
     <Typography variant="body2" color="#b9b9b9" align="center" {...props}>
       {'Copyright © '}
       {new Date().getFullYear()}
-      {'. versão 2.0.22.5'}
+      {'. versão 2.0.22.6'}
       <br />
       <br />
     </Typography>
