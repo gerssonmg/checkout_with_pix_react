@@ -7,13 +7,10 @@ import api from "../services/api";
 import Link from '@mui/material/Link';
 import { useHistory } from 'react-router-dom';
 import { getDatabase, get, ref, child, onValue } from "firebase/database";
-// import { writeBilhetesSchema } from '../database/schema'
 import CheckoutContext from '../context-global/checkout.context';
 import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 
 export default function App() {
-
-  // writeBilhetesSchema()
 
   const {
     checkout,

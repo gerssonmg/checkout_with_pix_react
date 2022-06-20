@@ -73,6 +73,7 @@ export default function CheckoutPixComponent() {
         return item[1].id === idByUrl[2]
       }))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrayBilhetes])
 
 
@@ -102,7 +103,7 @@ export default function CheckoutPixComponent() {
             }
 
             Object.entries(data).map((item) => {
-              if (item[1].CPF === cpf && item[1].status == 0 && item[1].idBilhete === bilheteSelected[0][0]) {
+              if (item[1].CPF === cpf && item[1].status === 0 && item[1].idBilhete === bilheteSelected[0][0]) {
                 exist = true
                 setExistCheckoutOpenCPF(true)
               }
@@ -211,6 +212,7 @@ export default function CheckoutPixComponent() {
         existCheckoutOpenForCPF()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bilheteSelected, userEmail, userCpf, isDateUserCorrect]);
 
 

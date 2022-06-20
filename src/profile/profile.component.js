@@ -410,9 +410,8 @@ function EditDialog({ name, cpf, nascimento, open, setOpen, id_transation = 0 })
       const pathEdit = id_transation === 0 ?
         `users/${user.uid}/` :
         `users/${user.uid}/bilhetes_online/${id_transation}`
-      console.log(formUpdateUserNascimento)
 
-      set(ref(db, pathEdit + "/edicao/" + `/${new Date()}`), {
+      set(ref(db, `${pathEdit}/edicao/${new Date()}`), {
         date: new Date(),
         name: name,
         CPF: cpf,
