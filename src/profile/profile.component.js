@@ -145,7 +145,7 @@ export default function ProfileComponent() {
 
             set(ref(db, `abilhetes/${id_transation}`), {
 
-              bilheteid: id_transation,
+              bilheteid: `${id_transation}`,
               cortesia: false,
               status: "1",
               usuarioid: user.uid

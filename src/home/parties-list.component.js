@@ -53,6 +53,10 @@ export default function App() {
     <div className="App App-header">
       <>
         {checkout?.id}
+        <Box mr={2}>
+          <img width="400px" src={require('../images/expoMeio.png')} />
+        </Box>
+
         Eventos na sua cidade: Montes Claros
 
         <Button
@@ -70,27 +74,25 @@ export default function App() {
         >
           Ver Perfil
         </Button>
+        <br />
         {
           arrayBilhetes.map((item) => {
             if (item[1].disponivel_para_compra)
               return (
-                <Box key={item[0]} style={{ backgroundColor: "#333333" }} display="flex" p={4}>
+                <Box mx={1} mb={1} border={1} borderColor="#35711a" borderRadius={2} flexWrap="wrap" key={item[0]} style={{ backgroundColor: "#ecf0f0" }} display="flex" p={4}>
                   <Box mr={2}>
-                    <img width="300px" src={require('../images/claudio.jpg')} />
+                    <img width="300px" src={require('../images/expSuperior.webp')} />
                   </Box>
 
                   <Box>
-                    <Box width="100px" style={{ border: "1px solid #535353", fontSize: "20px" }} >
-                      {/* 10 Julho */}
-                      {item[1]?.data}
-                    </Box>
+
                     <Box style={{ fontSize: "20px" }} >
                       {item[1]?.title}
                     </Box>
                     <Box style={{ fontSize: "20px", color: "#e60d1e" }} display="flex">
                       {item[1]?.describe}
                     </Box>
-                    <Box style={{ fontSize: "30px", color: "#9c1" }} display="flex">
+                    <Box justifyContent="center" style={{ fontSize: "30px", color: "#212529" }} display="flex">
                       R$ {item[1]?.valor}
                     </Box>
                     <Button
