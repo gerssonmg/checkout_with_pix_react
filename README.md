@@ -1,4 +1,6 @@
-# To-do
+## To-do
+
+[] Fase beta
 
 <!-- Implementar Recuperar senha 2 -->
 
@@ -42,14 +44,26 @@ altero nas config de `firebase.json`
 
 <!-- firebase target:apply hosting bilhe uaisolucoesbilhetes -->
 
-ESSES DOIS DEPOIS SO PRECISA
+<!-- ESSES DOIS DEPOIS SO PRECISA -->
 
 <!-- npm run-script build -->
 <!-- firebase deploy --only hosting -->
 
-# Getting Started with Create React App
+### Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+install:
+`npm install`
+
+Up app ambiente local: `npm start`
+
+### Deploy:
+
+- Altere a versão do App em `/App.js` linha 25 +/- `"{'. versão 2.0.22.10'}"`
+- Build da aplicação para fazer deploy: `npm run-script build`
+
+- Deploy no Firebase Hosting: `firebase deploy --only hosting`
+
+<!-- This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
@@ -116,4 +130,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 ### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify) -->
